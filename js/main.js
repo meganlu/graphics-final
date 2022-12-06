@@ -2,8 +2,15 @@ import * as THREE from 'three';
 import { EffectComposer } from 'EffectComposer';
 import { RenderPass } from 'RenderPass';
 import { GlitchPass } from 'GlitchPass';
+import { UnrealBloomPass } from 'UnrealBloomPass';
+import PixelatePass from 'pixelate';
 	const scene = new THREE.Scene();
 	const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+
+	let screenResolution = new THREE.Vector2( window.innerWidth, window.innerHeight );
+    let renderResolution = screenResolution.clone().divideScalar( 6 );
+    renderResolution.x |= 0;
+    renderResolution.y |= 0;
 
 	// Lights
  
@@ -38,8 +45,7 @@ import { GlitchPass } from 'GlitchPass';
 	const renderPass = new RenderPass( scene, camera );
 	composer.addPass( renderPass );
 
-	const glitchPass = new GlitchPass();
-	composer.addPass( glitchPass );
+	composer.addPass( new PixelatePass( renderResolution ) );
 
 
 function animate() {
