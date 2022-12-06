@@ -51,11 +51,9 @@ import {GUI} from 'GUI';
 
 
 	var options = {
+		degree: 3,
 		velx: 0.03,
 		vely: 0.03,
-		camera: {
-			speed: 0.0001
-		},
 		stop: function() {
 			this.velx = 0;
 			this.vely = 0;
@@ -66,12 +64,20 @@ import {GUI} from 'GUI';
 			camera.position.z = 1;
 			cube.material.wireframe = true;
 		}
+
 	};
 
 	var gui = new GUI();
 
 	gui.add(options, 'stop');
 	gui.add(options, 'reset');
+
+	gui.add(options, 'degree', 1, 25).onChange( function() {
+		composer.removePass(composer.passes[1]);
+		renderResolution = screenResolution.clone().divideScalar( options.degree );
+		composer.addPass(new PixelatePass( renderResolution ));
+	});
+	
 
 
 function animate() {
