@@ -9,11 +9,20 @@
 			margin: 0;
 		}
 	</style>
+
+	<script type="importmap">
+	        {
+	            "imports": {
+	                "three": "./node_modules/three/build/three.module.js",
+					"EffectComposer": "./node_modules/three/examples/jsm/postprocessing/EffectComposer.js",
+	                "RenderPass": "./node_modules/three/examples/jsm/postprocessing/RenderPass.js"
+	            }
+	        }
+	    </script>
 </head>
 
 <body>
-	<script src="js/three.js"></script>
-	<script src="js/main.js"></script>
+	<script type="module" src="js/main.js"></script>
 </body>
 
 </html>
