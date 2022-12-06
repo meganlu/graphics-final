@@ -4,6 +4,8 @@ import { RenderPass } from 'RenderPass';
 import { GlitchPass } from 'GlitchPass';
 import { UnrealBloomPass } from 'UnrealBloomPass';
 import PixelatePass from 'pixelate';
+
+import {GUI} from 'GUI';
 	const scene = new THREE.Scene();
 	const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 
@@ -48,11 +50,35 @@ import PixelatePass from 'pixelate';
 	composer.addPass( new PixelatePass( renderResolution ) );
 
 
+	var options = {
+		velx: 0.03,
+		vely: 0.03,
+		camera: {
+			speed: 0.0001
+		},
+		stop: function() {
+			this.velx = 0;
+			this.vely = 0;
+		},
+		reset: function() {
+			this.velx = 0.03;
+			this.vely = 0.03;
+			camera.position.z = 1;
+			cube.material.wireframe = true;
+		}
+	};
+
+	var gui = new GUI();
+
+	gui.add(options, 'stop');
+	gui.add(options, 'reset');
+
+
 function animate() {
 	requestAnimationFrame(animate);
 
-	cube.rotation.x += 0.03;
-	cube.rotation.y += 0.03;
+	cube.rotation.x += options.velx;
+	cube.rotation.y += options.vely;
 	composer.render(scene, camera);
 };
 

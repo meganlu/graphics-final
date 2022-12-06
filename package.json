@@ -2,5 +2,8 @@
   "type": "module",
   "dependencies": {
     "three": "^0.147.0"
+  },
+  "devDependencies": {
+    "dat.gui": "^0.7.9"
   }
 }
