@@ -1,8 +1,11 @@
 import * as THREE from 'three';
 import { EffectComposer } from 'EffectComposer';
 import { RenderPass } from 'RenderPass';
+import { GlitchPass } from 'GlitchPass';
 	const scene = new THREE.Scene();
 	const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+
+	// Lights
  
 	var ambientLight = new THREE.AmbientLight ( 0xffffff, 0.5);
 	scene.add( ambientLight );
@@ -11,13 +14,13 @@ import { RenderPass } from 'RenderPass';
 	pointLight.position.set( 25, 50, 25 );
 	scene.add( pointLight );
 
+	// Renderer and attaching
 
 	const renderer = new THREE.WebGLRenderer();
 	renderer.setSize(window.innerWidth, window.innerHeight);
 	document.body.appendChild(renderer.domElement);
 
-	
-
+	// Shape
 
 	const geometry = new THREE.BoxGeometry(0.2,0.2,0.2);
 	const material = new THREE.MeshStandardMaterial({ color: 0x0808080 });
@@ -29,9 +32,14 @@ import { RenderPass } from 'RenderPass';
 	camera.position.z = 1;
 	camera.position.y = 0;
 
+	// EffectComposer postprocessing
+
 	const composer = new EffectComposer( renderer );
 	const renderPass = new RenderPass( scene, camera );
 	composer.addPass( renderPass );
+
+	const glitchPass = new GlitchPass();
+	composer.addPass( glitchPass );
 
 
 function animate() {
