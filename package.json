@@ -1,7 +1,8 @@
 {
   "type": "module",
   "dependencies": {
-    "three": "^0.147.0"
+    "three": "^0.147.0",
+    "three.interactive": "^1.5.0"
   },
   "devDependencies": {
     "dat.gui": "^0.7.9"
