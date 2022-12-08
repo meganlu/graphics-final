@@ -1,4 +1,4 @@
-# graphics-final
+# CS1230 Final Project
 
 
 run this to install Node.js http-server package: npm install http-server -g
