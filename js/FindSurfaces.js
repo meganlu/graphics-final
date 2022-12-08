@@ -143,7 +143,7 @@ function getVertexShader() {
   varying vec4 vColor;
   void main() {
      v_uv = uv;
-     vColor = vec4(color, 1.0);
+     vColor = color;
      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
   }
   `;
@@ -184,3 +184,5 @@ export function getDebugSurfaceIdMaterial() {
     vertexColors: true,
   });
 }
+
+export { FindSurfaces };

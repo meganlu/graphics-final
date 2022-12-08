@@ -2,17 +2,16 @@ import * as THREE from 'three';
 import { EffectComposer } from 'EffectComposer';
 import { RenderPass } from 'RenderPass';
 import PixelatePass from 'pixelate';
-import { OutlinePass } from 'OutlinePass';
+import { SurfaceOutlinePass } from 'SurfaceOutlinePass';
+import { FindSurfaces } from 'FindSurfaces';
 
 
 import {GUI} from 'GUI';
 	const scene = new THREE.Scene();
 	const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 
-	
-
 	let screenResolution = new THREE.Vector2( window.innerWidth, window.innerHeight );
-    let renderResolution = screenResolution.clone().divideScalar( 6 );
+    let renderResolution = screenResolution.clone().divideScalar( 1 );
     renderResolution.x |= 0;
     renderResolution.y |= 0;
 
@@ -34,22 +33,18 @@ import {GUI} from 'GUI';
 	// Shape
 
 	const cubeGeometry = new THREE.BoxGeometry(1,1,1);
-	const tetGeometry = new THREE.TetrahedronGeometry(2);
-	const torusGeometry = new THREE.TorusGeometry( 10, 1, 15, 30 );
+	//const tetGeometry = new THREE.TetrahedronGeometry(2);
 
-	const material = new THREE.MeshStandardMaterial({color: 0x009400d3});
+	const material = new THREE.MeshNormalMaterial();
 
 	const cube = new THREE.Mesh(cubeGeometry, material);
-	const tetrahedron = new THREE.Mesh(tetGeometry, material);
-	const torus = new THREE.Mesh(torusGeometry, material);
+	//const tetrahedron = new THREE.Mesh(tetGeometry, material);
 			
 	scene.add(cube);
-	scene.add(tetrahedron);
-	scene.add(torus);
+	//scene.add(tetrahedron);
 
 	cube.position.set(5,0,0);
-	tetrahedron.position.set(-3,0,0);
-	torus.position.set(0,0,0);
+	//tetrahedron.position.set(-3,0,0);
 
 	camera.position.z = 10;
 	camera.position.y = 0;
@@ -73,14 +68,34 @@ import {GUI} from 'GUI';
 	composer.addPass( new PixelatePass( renderResolution ) );
 
 
-	const customOutline = new OutlinePass(
+	const surfaceOutline = new SurfaceOutlinePass(
 		new THREE.Vector2(window.innerWidth, window.innerHeight),
 		scene,
 		camera
 	);
-	composer.addPass(customOutline);
+	composer.addPass(surfaceOutline);
 
-		// RAY TRACING WITH MOUSE
+	const surfaceFinder = new FindSurfaces();	
+
+	function addSurfaceIdAttributeToMesh(scene) {
+  		surfaceFinder.surfaceId = 0;
+
+		scene.traverse((node) => {
+			if (node.type == "Mesh") {
+			const colorsTypedArray = surfaceFinder.getSurfaceIdAttribute(node);
+			node.geometry.setAttribute(
+				"color",
+				new THREE.BufferAttribute(colorsTypedArray, 4)
+			);
+			}
+		});
+
+  		surfaceOutline.updateMaxSurfaceId(surfaceFinder.surfaceId + 1);
+	}
+
+	addSurfaceIdAttributeToMesh(scene);
+
+	// RAY TRACING WITH MOUSE
 
 	var raycaster = new THREE.Raycaster();
 	var mouse = new THREE.Vector2();
@@ -101,7 +116,7 @@ import {GUI} from 'GUI';
 
 
 	var options = {
-		degree: 3,
+		degree: 1,
 		velx: 0.02,
 		vely: 0.02,
 		stop: function() {
@@ -132,14 +147,38 @@ import {GUI} from 'GUI';
 	velocity.add(options, 'vely', -0.5, 0.5).name('Y').listen();
 	velocity.open();
 
+	const uniforms = surfaceOutline.fsQuad.material.uniforms;
+
+	const params = {
+  mode: { Mode: 0 },
+  FXAA: true,
+  outlineColor: 0xffffff,
+  depthBias: uniforms.multiplierParameters.value.x,
+  depthMult: uniforms.multiplierParameters.value.y,
+  normalBias: uniforms.multiplierParameters.value.z,
+  normalMult: uniforms.multiplierParameters.value.w,
+  cameraNear: camera.near,
+  cameraFar: camera.far,
+};
+
+	gui.add(params.mode, "Mode", {
+    "Outlines V2": 0,
+    "Original scene": 2,
+    "Depth buffer": 3,
+    "Normal buffer": 4,
+    "SurfaceID debug buffer": 5,
+    "Outlines only V2": 6,
+    "Outlines only V1": 7,
+  })
+  .onChange(function (value) {
+    uniforms.debugVisualize.value = value;
+  });
 
 function animate() {
 	requestAnimationFrame(animate);
 
 	cube.rotation.x += options.velx;
 	cube.rotation.y += options.vely;
-	tetrahedron.rotation.x -= options.velx;
-	tetrahedron.rotation.y -= options.vely;
 
 	composer.render(scene, camera);
 };

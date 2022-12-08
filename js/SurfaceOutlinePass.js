@@ -7,7 +7,7 @@ import {
 
 // Follows the structure of
 // 		https://github.com/mrdoob/three.js/blob/master/examples/jsm/postprocessing/OutlinePass.js
-class OutlinePass extends Pass {
+class SurfaceOutlinePass extends Pass {
   constructor(resolution, scene, camera) {
     super();
 
@@ -272,4 +272,4 @@ class OutlinePass extends Pass {
   }
 }
 
-export { OutlinePass };
+export { SurfaceOutlinePass };
