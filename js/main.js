@@ -65,15 +65,17 @@ import {GUI} from 'GUI';
 	const renderPass = new RenderPass( scene, camera );
 	composer.addPass( renderPass );
 
-	composer.addPass( new PixelatePass( renderResolution ) );
-
-
 	const surfaceOutline = new SurfaceOutlinePass(
 		new THREE.Vector2(window.innerWidth, window.innerHeight),
 		scene,
 		camera
 	);
 	composer.addPass(surfaceOutline);
+
+	composer.addPass( new PixelatePass( renderResolution ) );
+
+
+	
 
 	const surfaceFinder = new FindSurfaces();	
 
@@ -137,7 +139,7 @@ import {GUI} from 'GUI';
 	gui.add(options, 'reset');
 
 	gui.add(options, 'degree', 1, 25).onChange( function() {
-		composer.removePass(composer.passes[1]);
+		composer.removePass(composer.passes[2]);
 		renderResolution = screenResolution.clone().divideScalar( options.degree );
 		composer.addPass(new PixelatePass( renderResolution ));
 	});
@@ -150,25 +152,14 @@ import {GUI} from 'GUI';
 	const uniforms = surfaceOutline.fsQuad.material.uniforms;
 
 	const params = {
-  mode: { Mode: 0 },
-  FXAA: true,
-  outlineColor: 0xffffff,
-  depthBias: uniforms.multiplierParameters.value.x,
-  depthMult: uniforms.multiplierParameters.value.y,
-  normalBias: uniforms.multiplierParameters.value.z,
-  normalMult: uniforms.multiplierParameters.value.w,
-  cameraNear: camera.near,
-  cameraFar: camera.far,
-};
+		mode: { Mode: 0 },
+	};
 
 	gui.add(params.mode, "Mode", {
     "Outlines V2": 0,
     "Original scene": 2,
-    "Depth buffer": 3,
-    "Normal buffer": 4,
     "SurfaceID debug buffer": 5,
     "Outlines only V2": 6,
-    "Outlines only V1": 7,
   })
   .onChange(function (value) {
     uniforms.debugVisualize.value = value;

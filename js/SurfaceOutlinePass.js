@@ -235,7 +235,7 @@ class SurfaceOutlinePass extends Pass {
 					// what we render into it
 					gl_FragColor = vec4(surfaceValue, 1.0);
 				}
-				if (debugVisualize == 6 || debugVisualize == 7) {
+				if (debugVisualize == 6) {
 					// Outlines only
 					gl_FragColor = vec4(vec3(outline * outlineColor), 1.0);
 				}				
