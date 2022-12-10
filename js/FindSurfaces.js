@@ -40,10 +40,8 @@ class FindSurfaces {
    */
   _generateSurfaceIds(mesh) {
     const bufferGeometry = mesh.geometry;
-    const numVertices = bufferGeometry.attributes.position.count;
     const numIndices = bufferGeometry.index.count;
     const indexBuffer = bufferGeometry.index.array;
-    const vertexBuffer = bufferGeometry.attributes.position.array;
     // For each vertex, search all its neighbors
     const vertexMap = {};
     for (let i = 0; i < numIndices; i += 3) {
