@@ -1,7 +1,7 @@
 import * as THREE from "three";
 
 /*
-  This class computes "surface IDs" for a given mesh.
+  Computes "surface IDs" for a given mesh.
   A "surface" is defined as a set of triangles that share vertices.
   
   Inspired by Ian MacLarty, see:
@@ -62,19 +62,19 @@ class FindSurfaces {
     }
 
     // Find cycles
-    const frontierNodes = Object.keys(vertexMap).map((v) => Number(v));
-    const exploredNodes = {};
+    const nodes = Object.keys(vertexMap).map((v) => Number(v));
+    const explored = {};
     const vertexIdToSurfaceId = {};
 
-    while (frontierNodes.length > 0) {
-      const node = frontierNodes.pop();
-      if (exploredNodes[node]) continue;
+    while (nodes.length > 0) {
+      const node = nodes.pop();
+      if (explored[node]) continue;
 
       // Get all neighbors recursively
-      const surfaceVertices = getNeighborsNonRecursive(node);
+      const surfaceNodes = getNeighborsNonRecursive(node);
       // Mark them as explored
-      for (let v of surfaceVertices) {
-        exploredNodes[v] = true;
+      for (let v of surfaceNodes) {
+        explored[v] = true;
         vertexIdToSurfaceId[v] = this.surfaceId;
       }
 
@@ -96,21 +96,21 @@ class FindSurfaces {
     }
 
     function getNeighborsNonRecursive(node) {
-      const frontier = [node];
+      const nodes = [node];
       const explored = {};
       const result = [];
 
-      while (frontier.length > 0) {
-        const currentNode = frontier.pop();
-        if (explored[currentNode]) continue;
-        const neighbors = vertexMap[currentNode];
-        result.push(currentNode);
+      while (nodes.length > 0) {
+        const current = nodes.pop();
+        if (explored[current]) continue;
+        const neighbors = vertexMap[current];
+        result.push(current);
 
-        explored[currentNode] = true;
+        explored[current] = true;
 
         for (let n of neighbors) {
           if (!explored[n]) {
-            frontier.push(n);
+            nodes.push(n);
           }
         }
       }

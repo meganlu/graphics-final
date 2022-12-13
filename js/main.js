@@ -4,74 +4,67 @@ import { RenderPass } from 'RenderPass';
 import PixelatePass from 'pixelate';
 import { SurfaceOutlinePass } from 'SurfaceOutlinePass';
 import { FindSurfaces } from 'FindSurfaces';
-
-
+import {Cube} from './scenes/cube.js';
+import {Stacking} from './scenes/stacking.js';
+import { Spinning } from './scenes/spinning.js';
 import {GUI} from 'GUI';
-	const scene = new THREE.Scene();
-	const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 
-	let screenResolution = new THREE.Vector2( window.innerWidth, window.innerHeight );
-    let renderResolution = screenResolution.clone().divideScalar( 1 );
-    renderResolution.x |= 0;
-    renderResolution.y |= 0;
+//UNCOMMENT FOR CUBE
+ //const cubeScene = new Cube();
+ //const scene = cubeScene.getScene();
+ //const camera = cubeScene.getCamera();
 
-	// LIGHTS
- 
-	var ambientLight = new THREE.AmbientLight ( 0xffffff, 0.5);
-	scene.add( ambientLight );
+// UNCOMMENT FOR STACKING
+//const stackingScene = new Stacking();
+//const scene = stackingScene.getScene();
+//const camera = stackingScene.getCamera();
+//TODO: get list of meshes somehow for raytracing step?
 
-	var pointLight = new THREE.PointLight( 0xffffff, 1 );
-	pointLight.position.set( 25, 50, 25 );
-	scene.add( pointLight );
+// UNCOMMENT FOR SPINNING
+const spinningScene = new Spinning();
+const scene = spinningScene.getScene();
+const camera = spinningScene.getCamera();
 
-	// RENDERER
 
-	const renderer = new THREE.WebGLRenderer();
-	renderer.setSize(window.innerWidth, window.innerHeight);
-	document.body.appendChild(renderer.domElement);
+let screenResolution = new THREE.Vector2( window.innerWidth, window.innerHeight );
+let renderResolution = screenResolution.clone().divideScalar( 1 );
+renderResolution.x |= 0;
+renderResolution.y |= 0;
 
-	// SHAPEŠ
+// Renderer and attaching
 
-	const cubeGeometry = new THREE.BoxGeometry(1,1,1);
-	const torusGeometry = new THREE.TorusGeometry();
+const renderer = new THREE.WebGLRenderer();
+renderer.setSize(window.innerWidth, window.innerHeight);
+document.body.appendChild(renderer.domElement);
 
-	const material = new THREE.MeshNormalMaterial();
+// EffectComposer postprocessing
 
-	const cube = new THREE.Mesh(cubeGeometry, material);
-	const torus = new THREE.Mesh(torusGeometry, material);
-			
-	scene.add(cube);
-	scene.add(torus);
+const depthTexture = new THREE.DepthTexture();
+const renderTarget = new THREE.WebGLRenderTarget(
+	window.innerWidth,
+	window.innerHeight,
+		{
+			depthTexture: depthTexture,
+			depthBuffer: true,
+		}
+);
 
-	cube.position.set(3,0,0);
-	torus.position.set(-2,0,0);
+const composer = new EffectComposer( renderer, renderTarget );
+const renderPass = new RenderPass( scene, camera );
+composer.addPass( renderPass );
 
-	camera.position.z = 5;
-	camera.position.y = 0;
+const surfaceOutline = new SurfaceOutlinePass(
+	new THREE.Vector2(window.innerWidth, window.innerHeight),
+	scene,
+	camera
+);
+composer.addPass(surfaceOutline);
 
-	// EFFECTCOMPOSER POSTPROCESSING
+composer.addPass( new PixelatePass( renderResolution ) );
 
-		const renderTarget = new THREE.WebGLRenderTarget(
-			window.innerWidth,
-			window.innerHeight
-		);
+const surfaceFinder = new FindSurfaces();	
 
-	const composer = new EffectComposer( renderer, renderTarget );
-	const renderPass = new RenderPass( scene, camera );
-	composer.addPass( renderPass );
-
-	const surfaceOutline = new SurfaceOutlinePass(
-		new THREE.Vector2(window.innerWidth, window.innerHeight),
-		scene,
-		camera
-	);
-
-	composer.addPass(surfaceOutline);
-	composer.addPass( new PixelatePass( renderResolution ) );
-
-	const surfaceFinder = new FindSurfaces();	
-
-	function addSurfaceIdAttributeToMesh(scene) {
+function addSurfaceIdAttributeToMesh(scene) {
   		surfaceFinder.surfaceId = 0;
 
 		scene.traverse((node) => {
@@ -90,15 +83,14 @@ import {GUI} from 'GUI';
 
 	addSurfaceIdAttributeToMesh(scene);
 
-	// RAY TRACING WITH MOUSE CLICKING
-
-	var raycaster = new THREE.Raycaster();
+var raycaster = new THREE.Raycaster();
 	var mouse = new THREE.Vector2();
 	function onMouseClick() {
 		raycaster.setFromCamera( mouse, camera );
 		const intersected = raycaster.intersectObjects( scene.children );
 		
 		for ( let i = 0; i < intersected.length; i ++ ) {
+			console.log(intersected[i].object);
 			intersected[i].object.applyOutline = !(intersected[i].object.applyOutline);
 		}
 	}
@@ -109,71 +101,44 @@ import {GUI} from 'GUI';
 	window.addEventListener( 'click', onMouseClick, false );
 	window.addEventListener( 'mousemove', onMouseMove, false );
 
-	// GUI
 
-	var options = {
-		degree: 1,
-		velx: 0.02,
-		vely: 0.02,
-		stop: function() {
-			this.velx = 0;
-			this.vely = 0;
-		},
-		reset: function() {
-			this.velx = 0.02;
-			this.vely = 0.02;
-			camera.position.z = 10;
-		}
+var options = {
+	degree: 1
+};
 
-	};
+var gui = new GUI();
 
-	var gui = new GUI();
 
-	gui.add(options, 'stop');
-	gui.add(options, 'reset');
+gui.add(options, 'degree', 1, 25).onChange( function() {
+	composer.removePass(composer.passes[2]);
+	renderResolution = screenResolution.clone().divideScalar( options.degree );
+	composer.addPass(new PixelatePass( renderResolution ));
+});
 
-	gui.add(options, 'degree', 1, 25).onChange( function() {
-		composer.removePass(composer.passes[2]);
-		renderResolution = screenResolution.clone().divideScalar( options.degree );
-		composer.addPass(new PixelatePass( renderResolution ));
-	});
-	
-	var velocity = gui.addFolder('Velocity');
-	velocity.add(options, 'velx', -0.5, 0.5).name('X').listen();
-	velocity.add(options, 'vely', -0.5, 0.5).name('Y').listen();
-	velocity.open();
+const uniforms = surfaceOutline.fsQuad.material.uniforms;
 
-	const uniforms = surfaceOutline.fsQuad.material.uniforms;
+const params = {
+	mode: { Mode: 0 },
+};
 
-	const params = {
-		mode: { Mode: 0 },
-	};
-
-	gui.add(params.mode, "Mode", {
-    "Enable outlines": 0,
+gui.add(params.mode, "Mode", {
+	"Enable outlines": 0,
 	"See only outlines": 1,
     "Original scene": 2,
-  })
-  .onChange(function (value) {
+})
+.onChange(function (value) {
 	if (value == 1) {
 		scene.traverse(node => node.applyOutline = true);
 	}
     uniforms.debugVisualize.value = value;
-  });
-
-
-// ANIMATE
+});
 
 function animate() {
-	requestAnimationFrame(animate);
-
-	cube.rotation.x += options.velx;
-	cube.rotation.y += options.vely;
-
-	torus.rotation.x += options.velx;
-	torus.rotation.y += options.vely;
-
-	composer.render(scene, camera);
-};
-
+	//UNCOMMENT FOR CUBE
+	//cubeScene.animate(composer, options);
+	//UNCOMMENT FOR STACKING
+	//setInterval(() => stackingScene.gameAnimation(composer, renderer), 1000);  
+	//UNCOMMENT FOR SPINNING
+	spinningScene.animate(composer, options)
+}
 animate();
