@@ -11,9 +11,9 @@ import {OrbitControls} from 'OrbitControls';
 import {GUI} from 'GUI';
 
 //UNCOMMENT FOR CUBE
- //const cubeScene = new Cube();
- //const scene = cubeScene.getScene();
- //const camera = cubeScene.getCamera();
+ const cubeScene = new Cube();
+ const scene = cubeScene.getScene();
+ const camera = cubeScene.getCamera();
 
 // UNCOMMENT FOR STACKING
 //const stackingScene = new Stacking();
@@ -22,9 +22,9 @@ import {GUI} from 'GUI';
 //TODO: get list of meshes somehow for raytracing step?
 
 // UNCOMMENT FOR SPINNING
-const spinningScene = new Spinning();
-const scene = spinningScene.getScene();
-const camera = spinningScene.getCamera();
+//const spinningScene = new Spinning();
+//const scene = spinningScene.getScene();
+//const camera = spinningScene.getCamera();
 
 let screenResolution = new THREE.Vector2( window.innerWidth, window.innerHeight );
 let renderResolution = screenResolution.clone().divideScalar( 1 );
@@ -143,10 +143,10 @@ gui.add(params.mode, "Mode", {
 
 function animate() {
 	//UNCOMMENT FOR CUBE
-	//cubeScene.animate(composer, options);
+	cubeScene.animate(composer, options);
 	//UNCOMMENT FOR STACKING
 	//setInterval(() => stackingScene.gameAnimation(composer, renderer), 1000);  
 	//UNCOMMENT FOR SPINNING
-	spinningScene.animate(composer, options)
+	//spinningScene.animate(composer, options)
 }
 animate();

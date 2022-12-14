@@ -1,4 +1,9 @@
 import * as THREE from 'three';
+import Stats from 'Stats';
+
+const stats = new Stats();
+stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
+document.body.appendChild(stats.dom);
 
 export default class Spinning {
 
@@ -52,6 +57,7 @@ export default class Spinning {
     }
     animate(composer, options) {
         requestAnimationFrame(() => this.animate(composer, options));
+        stats.begin();
         this.ring1.rotation.y += 0.015;
         this.ring2.rotation.x += 0.015;
         this.ring3.rotation.y -= 0.015;
@@ -59,6 +65,7 @@ export default class Spinning {
         this.torusKnot.rotation.y += 0.01;
         
         composer.render(this.scene, this.camera);
+        stats.end();
     };
 }
 
