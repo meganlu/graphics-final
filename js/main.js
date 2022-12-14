@@ -26,10 +26,10 @@ import {GUI} from 'GUI';
 //const scene = spinningScene.getScene();
 //const camera = spinningScene.getCamera();
 
-// UNCOMMENT FOR DRAG DROP 
-// const checkersScene = new Checkers();
-// const scene = checkersScene.getScene();
-// const camera = checkersScene.getCamera();
+// UNCOMMENT FOR CHECKERS
+const checkersScene = new Checkers();
+const scene = checkersScene.getScene();
+const camera = checkersScene.getCamera();
 
 
 let screenResolution = new THREE.Vector2( window.innerWidth, window.innerHeight );
@@ -45,7 +45,7 @@ document.body.appendChild(renderer.domElement);
 
 // Camera movement
 
-//const controls = new OrbitControls( camera, renderer.domElement );
+const controls = new OrbitControls( camera, renderer.domElement );
 
 // EffectComposer postprocessing
 
@@ -151,10 +151,10 @@ function animate() {
 	//UNCOMMENT FOR CUBE
 	//cubeScene.animate(composer, options);
 	//UNCOMMENT FOR STACKING
-	setInterval(() => stackingScene.gameAnimation(composer, renderer), 1000);  
+	//setInterval(() => stackingScene.gameAnimation(composer, renderer), 1000);  
 	//UNCOMMENT FOR SPINNING
-	spinningScene.animate(composer, options)
+	//spinningScene.animate(composer, options)
 	//UNCOMMENT FOR Checkers
-	//checkersScene.animate(composer, options);
+	checkersScene.animate(composer, options);
 }
 animate();

@@ -19,11 +19,7 @@ export default class Stacking {
         this.scene = new THREE.Scene();
         this.originalBoxSize = 2;
         this.stack = []
-<<<<<<< HEAD
-        this.boxHeight = 3;
-=======
         this.boxHeight = 2;
->>>>>>> 0401daf721a620c76e80239850859d34146c5ded
         this.gameStarted = false;
         this.originalColor = Math.random() * 360;
 
@@ -73,11 +69,6 @@ export default class Stacking {
       }
       
     gameAnimation(composer, renderer) {
-<<<<<<< HEAD
-=======
-        //console.log('in game Animation');
-        
->>>>>>> 0401daf721a620c76e80239850859d34146c5ded
         if (!this.gameStarted) {
           renderer.setAnimationLoop(() => this.animation(composer));
           this.gameStarted = true;
