@@ -77,21 +77,6 @@ class FindSurfaces {
       this.surfaceId += 1;
     }
 
-    function getNeighbors(node, explored) {
-      const neighbors = vertexMap[node];
-      let result = [node];
-      explored[node] = true;
-
-      for (let n of neighbors) {
-        if (explored[n]) continue;
-        explored[n] = true;
-        const newNeighbors = getNeighbors(n, explored);
-        result = result.concat(newNeighbors);
-      }
-
-      return result;
-    }
-
     function getNeighborsNonRecursive(node) {
       const nodes = [node];
       const explored = {};
@@ -150,8 +135,6 @@ function getFragmentShader() {
   varying vec4 vColor;
   uniform float maxSurfaceId;
   void main() {
-    // Normalize the surface ID when writing to texture
-    // Surface ID needs rounding as precision can be lost in perspective correct interpolation 
     float surfaceId = round(vColor.r) / maxSurfaceId;
     gl_FragColor = vec4(surfaceId, 0.0, 0.0, 1.0);
   }

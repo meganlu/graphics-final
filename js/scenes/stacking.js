@@ -1,4 +1,9 @@
 import * as THREE from 'three';
+import Stats from 'Stats';
+
+const stats = new Stats();
+stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
+document.body.appendChild(stats.dom);
 
 export default class Stacking {
     scene;
@@ -14,7 +19,11 @@ export default class Stacking {
         this.scene = new THREE.Scene();
         this.originalBoxSize = 2;
         this.stack = []
+<<<<<<< HEAD
         this.boxHeight = 3;
+=======
+        this.boxHeight = 2;
+>>>>>>> 0401daf721a620c76e80239850859d34146c5ded
         this.gameStarted = false;
         this.originalColor = Math.random() * 360;
 
@@ -64,9 +73,15 @@ export default class Stacking {
       }
       
     gameAnimation(composer, renderer) {
+<<<<<<< HEAD
+=======
+        //console.log('in game Animation');
+        
+>>>>>>> 0401daf721a620c76e80239850859d34146c5ded
         if (!this.gameStarted) {
           renderer.setAnimationLoop(() => this.animation(composer));
           this.gameStarted = true;
+          
         } else {
           const topLayer = this.stack[this.stack.length - 1];
           const direction = topLayer.direction;
@@ -81,7 +96,7 @@ export default class Stacking {
         }
       }
  
-    animation(composer) {
+    animation(composer) {   
         const speed = 0.15;
         const topLayer = this.stack[this.stack.length - 1]; 
         topLayer.threejs.position[topLayer.direction] += speed;
@@ -90,6 +105,8 @@ export default class Stacking {
           this.camera.position.y += speed;
         }
         composer.render(this.scene, this.camera);
+        stats.update();
+        
     }
 
     getScene() {

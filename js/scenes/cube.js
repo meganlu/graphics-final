@@ -1,8 +1,12 @@
 import * as THREE from 'three';
+import Stats from 'Stats';
+
+const stats = new Stats();
+stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
+document.body.appendChild(stats.dom);
 
 export default class Cube {
-    scene = null;
-    camera = null;
+
     constructor() {
         this.scene = new THREE.Scene();
         this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -45,11 +49,13 @@ export default class Cube {
     }
     animate(composer, options) {
         requestAnimationFrame(() => this.animate(composer, options));
+        stats.begin();
         this.cube.rotation.x += 0.03;
         this.cube.rotation.y += 0.03;
         this.torus.rotation.x += 0.03;
         this.torus.rotation.y += 0.03;
         composer.render(this.scene, this.camera);
+        stats.end();
     };
 }
 
