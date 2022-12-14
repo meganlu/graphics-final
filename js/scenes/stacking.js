@@ -17,11 +17,11 @@ export default class Stacking {
         this.scene = new THREE.Scene();
         this.originalBoxSize = 3;
         this.stack = []
-        this.boxHeight = 1;
+        this.boxHeight = 2;
         this.gameStarted = false;
       
         this.addLayer(0, 0, this.originalBoxSize, this.originalBoxSize);
-        this.addLayer(-9, 0, this.originalBoxSize, this.originalBoxSize, "x");
+        this.addLayer(-10, 0, this.originalBoxSize, this.originalBoxSize, "x");
       
         //add lights
         const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);

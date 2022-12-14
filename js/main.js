@@ -11,14 +11,14 @@ import {OrbitControls} from 'OrbitControls';
 import {GUI} from 'GUI';
 
 //UNCOMMENT FOR CUBE
- const cubeScene = new Cube();
- const scene = cubeScene.getScene();
- const camera = cubeScene.getCamera();
+ //const cubeScene = new Cube();
+ //const scene = cubeScene.getScene();
+ //const camera = cubeScene.getCamera();
 
 // UNCOMMENT FOR STACKING
-//const stackingScene = new Stacking();
-//const scene = stackingScene.getScene();
-//const camera = stackingScene.getCamera();
+const stackingScene = new Stacking();
+const scene = stackingScene.getScene();
+const camera = stackingScene.getCamera();
 //TODO: get list of meshes somehow for raytracing step?
 
 // UNCOMMENT FOR SPINNING
@@ -39,7 +39,7 @@ document.body.appendChild(renderer.domElement);
 
 // Camera movement
 
-const controls = new OrbitControls( camera, renderer.domElement );
+//const controls = new OrbitControls( camera, renderer.domElement );
 
 // EffectComposer postprocessing
 
@@ -143,9 +143,9 @@ gui.add(params.mode, "Mode", {
 
 function animate() {
 	//UNCOMMENT FOR CUBE
-	cubeScene.animate(composer, options);
+	//cubeScene.animate(composer, options);
 	//UNCOMMENT FOR STACKING
-	//setInterval(() => stackingScene.gameAnimation(composer, renderer), 1000);  
+	setInterval(() => stackingScene.gameAnimation(composer, renderer), 1000);  
 	//UNCOMMENT FOR SPINNING
 	//spinningScene.animate(composer, options)
 }
