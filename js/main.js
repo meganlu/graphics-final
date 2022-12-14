@@ -7,6 +7,7 @@ import { FindSurfaces } from 'FindSurfaces';
 import {Cube} from './scenes/cube.js';
 import {Stacking} from './scenes/stacking.js';
 import { Spinning } from './scenes/spinning.js';
+import {Checkers} from './scenes/checkers.js';
 import {OrbitControls} from 'OrbitControls';
 import {GUI} from 'GUI';
 
@@ -16,15 +17,20 @@ import {GUI} from 'GUI';
  //const camera = cubeScene.getCamera();
 
 // UNCOMMENT FOR STACKING
-//const stackingScene = new Stacking();
-//const scene = stackingScene.getScene();
-//const camera = stackingScene.getCamera();
-//TODO: get list of meshes somehow for raytracing step?
+// const stackingScene = new Stacking();
+// const scene = stackingScene.getScene();
+// const camera = stackingScene.getCamera();
 
 // UNCOMMENT FOR SPINNING
 const spinningScene = new Spinning();
 const scene = spinningScene.getScene();
 const camera = spinningScene.getCamera();
+
+// UNCOMMENT FOR DRAG DROP 
+// const checkersScene = new Checkers();
+// const scene = checkersScene.getScene();
+// const camera = checkersScene.getCamera();
+
 
 let screenResolution = new THREE.Vector2( window.innerWidth, window.innerHeight );
 let renderResolution = screenResolution.clone().divideScalar( 1 );
@@ -148,5 +154,7 @@ function animate() {
 	//setInterval(() => stackingScene.gameAnimation(composer, renderer), 1000);  
 	//UNCOMMENT FOR SPINNING
 	spinningScene.animate(composer, options)
+	//UNCOMMENT FOR Checkers
+	//checkersScene.animate(composer, options);
 }
 animate();

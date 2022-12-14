@@ -6,17 +6,21 @@ export default class Stacking {
     renderer;
     originalBoxSize = 3;
     stack = []
-    boxHeight = 1;
+    boxHeight = 2;
     gameStarted = false;
+    originalColor;
+ 
     constructor() {
         this.scene = new THREE.Scene();
-        this.originalBoxSize = 3;
+        this.originalBoxSize = 2;
         this.stack = []
-        this.boxHeight = 1;
+        this.boxHeight = 3;
         this.gameStarted = false;
-      
+        this.originalColor = Math.random() * 360;
+
         this.addLayer(0, 0, this.originalBoxSize, this.originalBoxSize);
-        this.addLayer(-10, 0, this.originalBoxSize, this.originalBoxSize, "x");
+        this.addLayer(-10, 0, this.originalBoxSize * Math.random() * 1.5 + 0.5, 
+          this.originalBoxSize * Math.random() * 1.5 + 0.5, "x");
       
         //add lights
         const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
@@ -36,8 +40,6 @@ export default class Stacking {
     }
       
     addLayer(x, z, width, depth, direction) {
-        //console.log("adding a layer");
-      
         const y = this.boxHeight * this.stack.length;
         const layer = this.generateBox(x, y, z, width, depth);
         layer.direction = direction;
@@ -46,7 +48,7 @@ export default class Stacking {
       
     generateBox(x, y, z, width, depth) {
         const geometry = new THREE.BoxGeometry(width, this.boxHeight, depth);
-        const color = new THREE.Color(`hsl(${30 + this.stack.length * 4}, 100%, 50%)`);
+        const color = new THREE.Color(`hsl(${this.originalColor + this.stack.length * 10}, 100%, 50%)`);
         const material = new THREE.MeshLambertMaterial({ color });
       
         const mesh = new THREE.Mesh(geometry, material);
@@ -62,9 +64,7 @@ export default class Stacking {
       }
       
     gameAnimation(composer, renderer) {
-        //console.log('in game Animation');
         if (!this.gameStarted) {
-         // console.log("game just started")
           renderer.setAnimationLoop(() => this.animation(composer));
           this.gameStarted = true;
         } else {
@@ -73,8 +73,8 @@ export default class Stacking {
       
           const nextX = direction == "x" ? 0 : -10;
           const nextZ = direction == "z" ? 0 : -10;
-          const newWidth = this.originalBoxSize;
-          const newDepth = this.originalBoxSize;
+          const newWidth = this.originalBoxSize * Math.random() * 1.5 + 0.5;
+          const newDepth = this.originalBoxSize  * Math.random() * 1.5 + 0.5;
           const nextDirection = direction == "x" ? "z" : "x";
       
           this.addLayer(nextX, nextZ, newWidth, newDepth, nextDirection);
