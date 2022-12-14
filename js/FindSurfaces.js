@@ -2,20 +2,15 @@ import * as THREE from "three";
 
 /*
   Computes "surface IDs" for a given mesh.
-  A "surface" is defined as a set of triangles that share vertices.
-  
-  Inspired by Ian MacLarty, see:
-    https://twitter.com/ianmaclarty/status/1499494878908403712
 */
 class FindSurfaces {
   constructor() {
-    // This identifier, must be globally unique for each surface
-    // across all geometry rendered on screen
+    // This identifier will be globally unique for each surface across all geometry rendered on screen
     this.surfaceId = 0;
   }
 
   /*
-   * Returns the surface Ids as a Float32Array that can be inserted as a vertex attribute
+   * Returns the surface IDs as an array that can be inserted as a vertex attribute
    */
   getSurfaceIdAttribute(mesh) {
     const bufferGeometry = mesh.geometry;
@@ -53,6 +48,7 @@ class FindSurfaces {
       add(i1, i3);
       add(i2, i3);
     }
+    // Function for creating vertex map of neighbors
     function add(a, b) {
       if (vertexMap[a] == undefined) vertexMap[a] = [];
       if (vertexMap[b] == undefined) vertexMap[b] = [];
@@ -61,7 +57,7 @@ class FindSurfaces {
       if (vertexMap[b].indexOf(a) == -1) vertexMap[b].push(a);
     }
 
-    // Find cycles
+    // Find cycles 
     const nodes = Object.keys(vertexMap).map((v) => Number(v));
     const explored = {};
     const vertexIdToSurfaceId = {};
@@ -80,6 +76,7 @@ class FindSurfaces {
 
       this.surfaceId += 1;
     }
+
     function getNeighbors(node, explored) {
       const neighbors = vertexMap[node];
       let result = [node];
@@ -153,34 +150,12 @@ function getFragmentShader() {
   varying vec4 vColor;
   uniform float maxSurfaceId;
   void main() {
-    // Normalize the surfaceId when writing to texture
+    // Normalize the surface ID when writing to texture
     // Surface ID needs rounding as precision can be lost in perspective correct interpolation 
-    // - see https://github.com/OmarShehata/webgl-outlines/issues/9 for other solutions eg. flat interpolation.
     float surfaceId = round(vColor.r) / maxSurfaceId;
     gl_FragColor = vec4(surfaceId, 0.0, 0.0, 1.0);
   }
   `;
-}
-
-// For debug rendering, assign a random color
-// to each surfaceId
-export function getDebugSurfaceIdMaterial() {
-  return new THREE.ShaderMaterial({
-    uniforms: {},
-    vertexShader: getVertexShader(),
-    fragmentShader: `
-  varying vec2 v_uv;
-  varying vec4 vColor;
-  void main() {      
-      int surfaceId = int(round(vColor.r) * 100.0);
-      float R = float(surfaceId % 255) / 255.0;
-      float G = float((surfaceId + 50) % 255) / 255.0;
-      float B = float((surfaceId * 20) % 255) / 255.0;
-      gl_FragColor = vec4(R, G, B, 1.0);
-  }
-  `,
-    vertexColors: true,
-  });
 }
 
 export { FindSurfaces };

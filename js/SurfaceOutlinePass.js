@@ -1,12 +1,10 @@
 import * as THREE from "three";
 import { FullScreenQuad, Pass } from "Pass";
 import {
-  getSurfaceIdMaterial,
-  getDebugSurfaceIdMaterial,
+  getSurfaceIdMaterial
 } from "FindSurfaces";
 
-// Follows the structure of
-// 		https://github.com/mrdoob/three.js/blob/master/examples/jsm/postprocessing/OutlinePass.js
+// https://github.com/mrdoob/three.js/blob/master/examples/jsm/postprocessing/OutlinePass.js
 class SurfaceOutlinePass extends Pass {
   constructor(resolution, scene, camera) {
     super();
@@ -55,7 +53,6 @@ class SurfaceOutlinePass extends Pass {
     this.normalOverrideMaterial = new THREE.MeshNormalMaterial();
 
     this.surfaceIdOverrideMaterial = getSurfaceIdMaterial();
-    this.surfaceIdDebugOverrideMaterial = getDebugSurfaceIdMaterial();
   }
 
   dispose() {
@@ -87,8 +84,8 @@ class SurfaceOutlinePass extends Pass {
     const debugVisualize = this.getDebugVisualizeValue();
 
     return (
-      debugVisualize == 0 || // Main outlines v2 mode
-      debugVisualize == 6    // Render just outlines with surfaceId
+      debugVisualize == 0 || // Allow outlines on selection
+      debugVisualize == 1    // Show only outlines
     ); 
   }
 
@@ -141,39 +138,28 @@ class SurfaceOutlinePass extends Pass {
     const depthBufferValue = writeBuffer.depthBuffer;
     writeBuffer.depthBuffer = false;
 
-    // 1. Re-render the scene to capture all normals (or suface IDs) in a texture.
+    // 1. Re-render the scene to capture all surface IDs in a texture.
     renderer.setRenderTarget(this.surfaceBuffer);
     const overrideMaterialValue = this.renderScene.overrideMaterial;
 
-    if (this.isUsingSurfaceIds()) {
-      // Render the "surface ID buffer"
-      if (this.getDebugVisualizeValue() == 5) {
-        this.renderScene.overrideMaterial = this.surfaceIdDebugOverrideMaterial;
-      } else {
-        this.renderScene.overrideMaterial = this.surfaceIdOverrideMaterial;
-      }
-    } else {
-      // Render normal buffer
-      this.renderScene.overrideMaterial = this.normalOverrideMaterial;
-    }
+    // Render the "surface ID buffer"   
+    this.renderScene.overrideMaterial = this.surfaceIdOverrideMaterial;  
 
-    // Only include objects that have the "applyOutline" property. 
-		// We do this by hiding all other objects temporarily.
-		this.setNonOutlineObjectsVisible(false);
+    // Only include objects that have the "applyOutline" property. We do this by hiding all other objects temporarily.
+	this.setNonOutlineObjectsVisible(false);
 
     renderer.render(this.renderScene, this.renderCamera);
     this.setNonOutlineObjectsVisible(true);
     this.renderScene.overrideMaterial = overrideMaterialValue;
-
     
     // 2. Re-render the scene to capture depth of objects that do NOT have outlines
-		renderer.setRenderTarget(this.depthTarget);
+	renderer.setRenderTarget(this.depthTarget);
 
-		this.setOutlineObjectsVisibile(false);
-		renderer.render(this.renderScene, this.renderCamera);
-		this.setOutlineObjectsVisibile(true);
+	this.setOutlineObjectsVisibile(false);
+	renderer.render(this.renderScene, this.renderCamera);
+	this.setOutlineObjectsVisibile(true);
 
-		this.fsQuad.material.uniforms["depthBuffer"].value = this.surfaceBuffer.depthTexture;
+	this.fsQuad.material.uniforms["depthBuffer"].value = this.surfaceBuffer.depthTexture;
 
     this.fsQuad.material.uniforms["surfaceBuffer"].value =
       this.surfaceBuffer.texture;
@@ -182,17 +168,14 @@ class SurfaceOutlinePass extends Pass {
     this.fsQuad.material.uniforms["nonOutlinesDepthBuffer"].value = this.depthTarget.depthTexture;
 
     // 3. Draw the outlines using the depth texture and normal texture
-    if (this.renderToScreen) {
-      // If this is the last effect, then renderToScreen is true.
-      // So we should render to the screen by setting target null
-      // Otherwise, just render into the writeBuffer that the next effect will use as its read buffer.
-      renderer.setRenderTarget(null);
-      this.fsQuad.render(renderer);
-    } else {
-      renderer.setRenderTarget(writeBuffer);
-      this.fsQuad.render(renderer);
-    }
 
+    // If this is the last effect, then renderToScreen is true.
+    // So we should render to the screen by setting target null
+    // Otherwise, just render into the writeBuffer that the next effect will use as its read buffer.
+
+    renderer.setRenderTarget(writeBuffer);
+    this.fsQuad.render(renderer);
+    
     // Reset the depthBuffer value so we continue writing to it in the next render.
     writeBuffer.depthBuffer = depthBufferValue;
   }
@@ -214,7 +197,7 @@ class SurfaceOutlinePass extends Pass {
 			uniform sampler2D sceneColorBuffer;
 			uniform sampler2D depthBuffer;
 			uniform sampler2D surfaceBuffer;
-      uniform sampler2D nonOutlinesDepthBuffer;
+      		uniform sampler2D nonOutlinesDepthBuffer;
 			uniform float cameraNear;
 			uniform float cameraFar;
 			uniform vec4 screenSize;
@@ -241,7 +224,7 @@ class SurfaceOutlinePass extends Pass {
 				// vUv is current position
 				return readDepth(depthBuffer, vUv + screenSize.zw * vec2(x, y));
 			}
-			// "surface value" is either the normal or the "surfaceID"
+			// "surface value" is the "surfaceID"
 			vec3 getSurfaceValue(int x, int y) {
 				vec3 val = texture2D(surfaceBuffer, vUv + screenSize.zw * vec2(x, y)).rgb;
 				return val;
@@ -264,8 +247,8 @@ class SurfaceOutlinePass extends Pass {
 			void main() {
 				vec4 sceneColor = texture2D(sceneColorBuffer, vUv);
 				float depth = getPixelDepth(0, 0);
-        float nonOutlinesDepth = readDepth(nonOutlinesDepthBuffer, vUv + screenSize.zw);
-				// "surfaceValue" is either the normal or the surfaceId
+        		float nonOutlinesDepth = readDepth(nonOutlinesDepthBuffer, vUv + screenSize.zw);
+				// "surfaceValue" is the surfaceId
 				vec3 surfaceValue = getSurfaceValue(0, 0);
 				// Get the difference between depth of neighboring pixels and current.
 				float depthDiff = 0.0;
@@ -306,9 +289,8 @@ class SurfaceOutlinePass extends Pass {
 				// Combine outline with scene color.
 				vec4 outlineColor = vec4(outlineColor, 1.0);
 				gl_FragColor = vec4(mix(sceneColor, outlineColor, outline));
-				//// For debug visualization of the different inputs to this shader.
 
-        if (debugVisualize == 1) {
+        		if (debugVisualize == 1) {
 					// Outlines only
 					gl_FragColor = vec4(vec3(outline * outlineColor), 1.0);
 				}		

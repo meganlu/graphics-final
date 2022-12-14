@@ -1,12 +1,13 @@
 import * as THREE from 'three';
 import { EffectComposer } from 'EffectComposer';
 import { RenderPass } from 'RenderPass';
-import PixelatePass from 'pixelate';
+import PixelatePass from 'PixelatePass';
 import { SurfaceOutlinePass } from 'SurfaceOutlinePass';
 import { FindSurfaces } from 'FindSurfaces';
 import {Cube} from './scenes/cube.js';
 import {Stacking} from './scenes/stacking.js';
 import { Spinning } from './scenes/spinning.js';
+import {OrbitControls} from 'OrbitControls';
 import {GUI} from 'GUI';
 
 //UNCOMMENT FOR CUBE
@@ -25,7 +26,6 @@ const spinningScene = new Spinning();
 const scene = spinningScene.getScene();
 const camera = spinningScene.getCamera();
 
-
 let screenResolution = new THREE.Vector2( window.innerWidth, window.innerHeight );
 let renderResolution = screenResolution.clone().divideScalar( 1 );
 renderResolution.x |= 0;
@@ -36,6 +36,10 @@ renderResolution.y |= 0;
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
+
+// Camera movement
+
+const controls = new OrbitControls( camera, renderer.domElement );
 
 // EffectComposer postprocessing
 
@@ -83,6 +87,8 @@ function addSurfaceIdAttributeToMesh(scene) {
 
 	addSurfaceIdAttributeToMesh(scene);
 
+// Raycaster for mouse selection
+
 var raycaster = new THREE.Raycaster();
 	var mouse = new THREE.Vector2();
 	function onMouseClick() {
@@ -101,6 +107,8 @@ var raycaster = new THREE.Raycaster();
 	window.addEventListener( 'click', onMouseClick, false );
 	window.addEventListener( 'mousemove', onMouseMove, false );
 
+
+// GUI with options for pixelation degree and outline mode
 
 var options = {
 	degree: 1
